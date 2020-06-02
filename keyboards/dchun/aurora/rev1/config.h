@@ -1,7 +1,5 @@
-#ifndef MASTER_CONFIG_H_
-#define MASTER_CONFIG_H_
+#pragma once
 #include "custom_board.h"
 
 #define ENABLE_STARTUP_ADV_NOLIST
-
-#endif /* MASTER_CONFIG_H_ */
+#define IS_LEFT_HAND  true

@@ -1,5 +1,4 @@
 #include QMK_KEYBOARD_H
-
 #include "app_ble_func.h"
 #include "nrf_log.h"
 #include "nrf_gpio.h"
@@ -10,7 +9,7 @@ enum layer_number {
 };
 
 enum custom_keycodes {
-  AD_WO_LUST = SAFE_RANGE, /* Start advertising without whitelist  */
+  AD_WO_L = SAFE_RANGE,    /* Start advertising without whitelist  */
   BLE_DIS,                 /* Disable BLE HID sending              */
   BLE_EN,                  /* Enable BLE HID sending               */
   USB_DIS,                 /* Disable USB HID sending              */
@@ -54,7 +53,6 @@ enum custom_keycodes {
 #define KC_BTID4 ADV_ID4
 
 
-
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   /* Keymap _BL: (Base Layer) Default Layer
    * ,----------------------------------------------------------------.
@@ -69,20 +67,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |Ctrl|Win |Alt |        Space          |Alt| FN|Ctrl|Lef|Dow|Rig |
    * `----------------------------------------------------------------'
    */
-  [_QWERTY] = LAYOUT(
+  [_QWERTY] = LAYOUT( \
     KC_ESC,  KC_1,    KC_2,   KC_3,   KC_4,   KC_5,   KC_6,   KC_7,   KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  KC_BSPC, KC_HOME, \
     KC_TAB,  KC_Q,    KC_W,   KC_E,   KC_R,   KC_T,   KC_Y,   KC_U,   KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, KC_PGUP, \
     KC_CAPS, KC_A,    KC_S,   KC_D,   KC_F,   KC_G,   KC_H,   KC_J,   KC_K,    KC_L,    KC_SCLN, KC_QUOT,          KC_ENT,  KC_PGDN, \
     KC_LSFT, KC_Z,    KC_X,   KC_C,   KC_V,   KC_B,   KC_N,   KC_M,   KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,           KC_UP,   KC_END, \
-    KC_LCTL, KC_LGUI, KC_LALT,                        KC_SPC,                  KC_ADJ,  KC_RALT,          KC_LEFT, KC_DOWN, KC_RGHT
+    KC_LCTL, KC_LGUI, KC_LALT,                        KC_SPC,                  KC_ADJ,  KC_RALT,          KC_LEFT, KC_DOWN, KC_RGHT  \
   ),
 
-  [_ADJUST] = LAYOUT(
-     RESET, ADV_ID1, ADV_ID2, DEL_ID1, DEL_ID2,  ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______, ENT_DFU,  ______, \
-     DEBUG, DELBNDS, USB_DIS,  USB_EN,  ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______, \
-   AD_WO_L,  ______, BLE_DIS,  BLE_EN,  ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______,          ENT_SLP,  ______, \
-    ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______,  ______,           ______,  ______, \
-    ______,  ______,  ______,                             ______,                    ______,  ______,           ______,  ______,  ______
+  [_ADJUST] = LAYOUT( \
+     RESET, ADV_ID1, ADV_ID2, DEL_ID1, DEL_ID2,KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______, ENT_DFU,KC______, \
+     DEBUG, DELBNDS, USB_DIS,  USB_EN,KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______, \
+   AD_WO_L,KC______, BLE_DIS,  BLE_EN,KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______,          ENT_SLP,KC______, \
+  KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______,KC______,         KC______,KC______, \
+  KC______,KC______,KC______,                           KC______,                  KC______,KC______,         KC______,KC______,KC______  \
   )
 };
 
@@ -96,12 +94,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #define DFU_DBL_RESET_MEM               0x20007F7C
 #define DFU_MAGIC_UF2_RESET             0x57
 uint32_t* dbl_reset_mem = ((uint32_t*)  DFU_DBL_RESET_MEM );
+
 void uf2_jump(void) {
   NRF_POWER->GPREGRET = DFU_MAGIC_UF2_RESET;
   *dbl_reset_mem = DFU_DBL_RESET_MAGIC;
   NRF_POWER->RESETREAS |= POWER_RESETREAS_RESETPIN_Msk;
   NVIC_SystemReset();
 }
+
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   char str[16];
@@ -164,22 +164,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       sprintf(str, "%4dmV", get_vcc());
       send_string(str);
       return false;
-    case ENT_DFU: case RESET:
+    case ENT_DFU: 
+    case RESET:
       bootloader_jump();
       return false;
     case DEBUG:
       uf2_jump();
-      return false;
-    case BLE_DBG:
-      set_ble_enabled(true);
-      //delete_bonds(); // causes reset
-      restart_advertising_wo_whitelist();
-      return false;
-    case BL_INC:
-      nrf_gpio_pin_set(BACKLIGHT_PIN);
-      return false;
-    case BL_DEC:
-      nrf_gpio_pin_clear(BACKLIGHT_PIN);
       return false;
     }
   }
